@@ -1,185 +1,78 @@
-# ***Цель - создать модель машинного обучения, которая будет классифицировать отзывы к фильмам на положительные и отрицательные.***
+# Цель
 
-# Загрузка файла с помощью wget
-```!wget https://storage.yandexcloud.net/storage32/imdb_master.csv
+Создание модели машинного обучения для классификации отзывов к фильмам на положительные и отрицательные.
 
-import pandas as pd
+## Загрузка данных
 
-# Загрузка данных
-data = pd.read_csv('imdb_master.csv', encoding='ISO-8859-1')
+- Используется `wget` для загрузки файла с датасетом IMDB.
+- Датасет загружается в DataFrame с помощью билиотеки `pandas`.
 
-# Просмотр первых 5 записей
-print(data.head())
+## Просмотр данных
 
-# Просмотр информации о данных
-print(data.info())
-```
-# **Препроцессинг данных:**
-*Перед обучением модели, необходимо провести предобработку данных. Возможные шаги препроцессинга включают:*
-- Очистку данных от ненужных символов или специальных символов.
-- Приведение текста к нижнему регистру.
-- Токенизацию текста.
-- Удаление стоп-слов.
+- Выводятся первые 5 записи датасета.
+- Выводится информация о структуре данных (количестве строк, столбцов, типах данных).
 
-```import re
-import nltk
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
-nltk.download('stopwords')
-nltk.download('punkt')
-nltk.download('wordnet')
+## Препроцессинг данных
 
-# Инициализация лемматизатора и стоп-слов
-lemmatizer = WordNetLemmatizer()
-stop_words = set(stopwords.words('english'))
+- Импортируются необходимые библиотеки для работы с текстом (`re`, `nltk`).
+- Загружаются стоп-слова и лемматизатор из `nltk`.
+- Определяется функция `preprocess` для очистки текста от специальных символов, приведения текста к нижнему регистру, токенизации, удаления стоп-слов и лемматизации.
+- Препроцессинг применяется к столбцу с текстами отзывов.
 
-# Функция для препроцессинга текста
-def preprocess(text):
-    # Очистка текста от специальных символов
-    text = re.sub(r'\W+', ' ', text)
+## Разделение данных
 
-    # Приведение текста к нижнему регистру
-    text = text.lower()
+- Датасет разделяется на обучающую и тестовую выборки с помощью `train_test_split` из `sklearn.model_selection`.
 
-    # Токенизация текста
-    tokens = nltk.word_tokenize(text)
+## Векторизация текста
 
-    # Удаление стоп-слов и лемматизация токенов
-    tokens = [lemmatizer.lemmatize(token) for token in tokens if token not in stop_words]
+- Используется `TfidfVectorizer` из `sklearn.feature_extraction.text` для преобразования текста в числовые векторы.
+- Обучающие и тестовые данные преобразуются в числовые векторы.
 
-    return ' '.join(tokens)
+## Обучение модели
 
-# Применение препроцессинга к столбцу с текстом
-data['review'] = data['review'].apply(lambda x: preprocess(x))
-```
-# ***Разделение на обучающую и тестовую выборки:***
-*Теперь, когда данные препроцессированы, нам нужно разделить их на обучающую и тестовую выборки. Мы будем использовать 80% данных для обучения модели и 20% для ее оценки.*
-```
-from sklearn.model_selection import train_test_split
+- Создается модель логистической регрессии (`LogisticRegression`) из `sklearn.linear_model`.
+- Модель обучается на обучающей выборке.
 
-# Разделение данных на обучающую и тестовую выборки
-X_train, X_test, y_train, y_test = train_test_split(data['review'], data['label'], test_size=0.2, random_state=42)
-```
-# ***Векторизация текста:***
-*Для преобразования текста в числовые векторы, мы будем использовать метод TF-IDF. TF-IDF представляет собой комбинацию двух компонент: term frequency (TF) и inverse document frequency (IDF).*
+## Оценка модели
 
-*TF определяет, насколько часто слово появляется в документе. IDF определяет, насколько редким или уникальным является слово во всей коллекции документов.*
+- Используется `accuracy_score` из `sklearn.metrics` для оценки точности модели на тестовой выборке.
+- Выводится значение точности.
 
-*Для векторизации текста, используем библиотеку scikit-learn:*
-```
-from sklearn.feature_extraction.text import TfidfVectorizer
+## Визуализация данных
 
-# Создание экземпляра векторизатора TF-IDF
-vectorizer = TfidfVectorizer()
+### 1. Распределение положительных и отрицательных отзывов
+- Подсчитываются количества положительных и отрицательных отзывов.
+- Строится круговая диаграмма с помощью `matplotlib` для визуализации распределения отзывов.
 
-# Преобразование обучающих данных в числовые векторы
-X_train_vectorized = vectorizer.fit_transform(X_train)
+### 2. Важность признаков
+- Получается список признаков и коэффициенты логистической регрессии.
+- Отсортировываются признаки по их важности.
+- Строится график баров для отображения 20 наиболее важных признаков.
 
-# Преобразование тестовых данных в числовые векторы
-X_test_vectorized = vectorizer.transform(X_test)
-```
-# ***Обучение модели:***
-*После векторизации текста, мы можем перейти к обучению модели. Для классификации отзывов к фильмам будем использовать алгоритм логистической регрессии. Логистическая регрессия является простой и эффективной моделью для задач классификации.*
-```
-from sklearn.linear_model import LogisticRegression
+### 3. Матрица ошибок
+- Построение матрицы ошибок с помощью `confusion_matrix` из `sklearn.metrics`.
+- Визуализация тепловой карты с помощью `seaborn`.
 
-# Создание экземпляра модели логистической регрессии
-model = LogisticRegression(max_iter=1000)
+### 4. Кривая обучения
+- Вычисление кривой обучения с помощью `learning_curve` из `sklearn.model_selection`.
+- Построение графика зависимости производительности от размера обучающей выборки.
 
-# Обучение модели на обучающих данных
-model.fit(X_train_vectorized, y_train)
-```
-# ***Оценка модели:***
-*После обучения модели, нам необходимо оценить ее производительность на тестовых данных. Для этого можем использовать метрику accuracy, которая показывает долю правильных предсказаний модели.*
-```
-from sklearn.metrics import accuracy_score
+## Стек технологий
 
-# Предсказание меток классов для тестовых данных
-y_pred = model.predict(X_test_vectorized)
+- **Python**: Язык программирования, используемый для написания кода и реализации данных.
+- **Pandas**: Библиотека для обработки и анализа данных, используется для загрузки и манипуляции DataFrame.
+- **NumPy**: Библиотека для работы с массивами и математическими операциями (неявно используется через `pandas`).
+- **NLTK (Natural Language Toolkit)**: Библиотека для обработки естественного языка, используется для токенизации, удаления стоп-слов и лемматизации текста.
+- **Scikit-learn (sklearn)**: Библиотека для машинного обучения, используется для препроцессинга данных, разделения датасета, векторизации текста, обучения модели и оценки ее производительности.
+- **Matplotlib**: Библиотека для визуализации данных, используется для построения круговой диаграммы и графиков баров.
+- **Seaborn**: Библиотека для визуализации данных, используется для построения тепловой карты.
+- **Wget**: Команда-утилита для загрузки файлов из интернета, используется для загрузки датасета.
 
-# Оценка производительности модели
-accuracy = accuracy_score(y_test, y_pred)
-print("Accuracy:", accuracy)
-```
-# Визуализация 1: Распределение положительных и отрицательных отзывов в датасете
-```
-import matplotlib.pyplot as plt
+## Как запустить проект
+- Скопируйте код в `projeck1`
+- Создайте блокнот в Google Colab и вставьте туда скопированный код
+- Запустите код (среда выполнения CPU)
 
-# Подсчет количества положительных и отрицательных отзывов
-positive_reviews = data[data['label'] == 'pos']
-negative_reviews = data[data['label'] == 'neg']
 
-num_positive_reviews = len(positive_reviews)
-num_negative_reviews = len(negative_reviews)
 
-# Построение круговой диаграммы
-labels = ['Positive', 'Negative']
-sizes = [num_positive_reviews, num_negative_reviews]
-colors = ['#ff9999','#66b3ff']
 
-plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90)
-plt.axis('equal')
-
-plt.title('Distribution of Positive and Negative Reviews')
-plt.show()
-```
-# Визуализация 2: Важность признаков
-```
-import numpy as np
-
-# Получение списка признаков
-features = vectorizer.get_feature_names_out()
-
-# Получение коэффициентов логистической регрессии
-coefficients = model.coef_[0]
-
-# Отсортировать признаки по их важности
-sorted_features = [ feature for _, feature in sorted(zip(coefficients, features))]
-
-# Построение графика баров
-plt.figure(figsize=(12, 6))
-plt.bar(range(len(sorted_features[:20])), sorted(coefficients[:20]), align='center')
-plt.xticks(range(len(sorted_features[:20])), sorted_features[:20], rotation='vertical')
-plt.xlabel('Features')
-plt.ylabel('Coefficient')
-plt.title('Top 20 Important Features')
-plt.tight_layout()
-plt.xticks(rotation=35)
-plt.show()
-```
-# Визуализация 3: Матрица ошибок
-```
-from sklearn.metrics import confusion_matrix
-import seaborn as sns
-
-# Построение матрицы ошибок
-confusion = confusion_matrix(y_test, y_pred)
-
-# Визуализация тепловой карты
-sns.heatmap(confusion, annot=True, fmt='d', cmap='Blues')
-
-plt.title('Confusion Matrix')
-plt.xlabel('Predicted Label')
-plt.ylabel('True Label')
-plt.show()
-```
-# Визуализация 4: Кривая обучения
-```
-from sklearn.model_selection import learning_curve
-import numpy as np
-
-# Вычисление кривой обучения
-train_sizes, train_scores, test_scores = learning_curve(model, X_train_vectorized, y_train, cv=5)
-train_scores_mean = np.mean(train_scores, axis=1)
-test_scores_mean = np.mean(test_scores, axis=1)
-
-# Построение графика зависимости производительности от размера обучающей выборки
-plt.figure(figsize=(8, 6))
-plt.plot(train_sizes, train_scores_mean, 'o-', color='r', label='Training score')
-plt.plot(train_sizes, test_scores_mean, 'o-', color='g', label='Cross-validation score')
-plt.xlabel('Training Examples')
-plt.ylabel('Score')
-plt.title('Learning Curve')
-plt.legend()
-plt.show()
-```
