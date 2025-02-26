@@ -94,8 +94,8 @@ class Task {
 
 1. **Клонирование репозитория**
    ```bash
-   git clone https://github.com/yourusername/task-manager.git
-   cd task-manager
+   git clone https://github.com/Embarg0o/Embarg0o.github.io.git
+   cd Embarg0o.github.io/Task_Manager
    ```
 
 2. **Установка зависимостей**
