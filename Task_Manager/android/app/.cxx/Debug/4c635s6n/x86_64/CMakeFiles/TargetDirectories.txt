@@ -1,0 +1,2 @@
+D:/last_hw/homework52/test/Task_Manager/android/app/.cxx/Debug/4c635s6n/x86_64/CMakeFiles/edit_cache.dir
+D:/last_hw/homework52/test/Task_Manager/android/app/.cxx/Debug/4c635s6n/x86_64/CMakeFiles/rebuild_cache.dir
